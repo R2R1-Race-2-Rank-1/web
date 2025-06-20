@@ -8,6 +8,8 @@ package main
 import (
 	"encoding/gob"
 	"fmt"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/fatih/structs"
@@ -99,6 +101,33 @@ var (
 	CSRF services.CSRF
 )
 
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
+}
+
+func getEnvBool(key string, fallback bool) bool {
+	if value := os.Getenv(key); value != "" {
+		b, err := strconv.ParseBool(value)
+		if err == nil {
+			return b
+		}
+	}
+	return fallback
+}
+
+func getEnvInt(key string, fallback int) int {
+	if value := os.Getenv(key); value != "" {
+		i, err := strconv.Atoi(value)
+		if err == nil {
+			return i
+		}
+	}
+	return fallback
+}
+
 func main() {
 	err := agplwarning.Warn("ripple", "Hanayo")
 	if err != nil {
@@ -126,25 +155,42 @@ func main() {
 		panic(err)
 	}
 
-	var configDefaults = map[*string]string{
-		&config.ListenTo:         ":45221",
-        &config.AvatarURL:        "/avatars",
-        &config.RedisAddress:     "redis:6379",
-		&config.CookieSecret:     rs.String(46),
-		&config.AvatarURL:        "https://a.ripple.moe",
-		&config.BaseURL:          "https://ripple.moe",
-		&config.BanchoAPI:        "https://c.ripple.moe",
-		&config.CheesegullAPI:    "https://cheesegull/api",
-		&config.API:              "http://rippleapi:40001/api/v1/",
-		&config.IP_API:           "https://ip.zxq.co",
-		&config.DiscordServer:    "#",
-		&config.MainRippleFolder: "/home/ripple/ripple",
-		&config.MailgunFrom:      `"Ripple" <noreply@ripple.moe>`,
-	}
-	for key, value := range configDefaults {
-		if *key == "" {
-			*key = value
-		}
+	config = configType{
+		ListenTo:          getEnv("APP_HOST", ":45221"),
+		Unix:              getEnvBool("UNIX", false),
+		DSN:               getEnv("DSN", getEnv("WRITE_DB_USER", "root")+":"+getEnv("WRITE_DB_PASS", "password")+"@tcp("+getEnv("WRITE_DB_HOST", "db:3306")+")/"+getEnv("WRITE_DB_NAME", "ripple")),
+		RedisEnable:       getEnvBool("REDIS_ENABLE", true),
+		AvatarURL:         getEnv("PUBLIC_AVATARS_SERVICE_BASE_URL", "https://a.ripple.moe"),
+		BaseURL:           getEnv("APP_BASE_URL", "https://ripple.moe"),
+		API:               getEnv("INTERNAL_AKATSUKI_API_BASE_URL", "http://rippleapi:40001/api/v1/"),
+		BanchoAPI:         getEnv("PUBLIC_BANCHO_SERVICE_BASE_URL", "https://c.ripple.moe"),
+		CheesegullAPI:     getEnv("PUBLIC_BEATMAPS_SERVICE_BASE_URL", "https://cheesegull/api"),
+		APISecret:         getEnv("APP_API_KEY", "APISECRETVALUE"),
+		Offline:           getEnvBool("OFFLINE", false),
+		MainRippleFolder:  getEnv("MAIN_RIPPLE_FOLDER", "/home/ripple/ripple"),
+		AvatarsFolder:     getEnv("AVATARS_FOLDER", ""),
+		CookieSecret:      getEnv("APP_COOKIE_SECRET", rs.String(46)),
+		RedisMaxConnections: getEnvInt("REDIS_MAX_CONNECTIONS", 0),
+		RedisNetwork:      getEnv("REDIS_NETWORK_TYPE", "tcp"),
+		RedisAddress:      getEnv("REDIS_HOST", "redis:6379")+":"+getEnv("REDIS_PORT", "6379"),
+		RedisPassword:     getEnv("REDIS_PASS", ""),
+		DiscordServer:     getEnv("DISCORD_SERVER_URL", "#"),
+		BaseAPIPublic:     getEnv("PUBLIC_AKATSUKI_API_BASE_URL", ""),
+		Production:        getEnvInt("PRODUCTION", 0),
+		MailgunDomain:     getEnv("MAILGUN_DOMAIN", ""),
+		MailgunPrivateAPIKey: getEnv("MAILGUN_API_KEY", ""),
+		MailgunPublicAPIKey:  getEnv("MAILGUN_PUBLIC_KEY", ""),
+		MailgunFrom:       getEnv("MAILGUN_FROM", `"Ripple" <noreply@ripple.moe>`),
+		RecaptchaSite:     getEnv("RECAPTCHA_SITE_KEY", ""),
+		RecaptchaPrivate:  getEnv("RECAPTCHA_SECRET_KEY", ""),
+		DiscordOAuthID:    getEnv("DISCORD_CLIENT_ID", ""),
+		DiscordOAuthSecret: getEnv("DISCORD_CLIENT_SECRET", ""),
+		DonorBotURL:       getEnv("DONOR_BOT_URL", ""),
+		DonorBotSecret:    getEnv("DONOR_BOT_SECRET", ""),
+		CoinbaseAPIKey:    getEnv("COINBASE_API_KEY", ""),
+		CoinbaseAPISecret: getEnv("COINBASE_API_SECRET", ""),
+		SentryDSN:         getEnv("SENTRY_DSN", ""),
+		IP_API:            getEnv("IP_LOOKUP_URL", "https://ip.zxq.co"),
 	}
 
 	configMap = structs.Map(config)
