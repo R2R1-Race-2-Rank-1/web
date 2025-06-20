@@ -137,7 +137,7 @@ func main() {
 	fmt.Println("hanayo " + version)
 
 	config = configType{
-		ListenTo:          getEnv("APP_HOST", ":45221"),
+		ListenTo:          ":80",
 		Unix:              getEnvBool("UNIX", false),
 		DSN:               getEnv("DSN", getEnv("WRITE_DB_USER", "root")+":"+getEnv("WRITE_DB_PASS", "password")+"@tcp("+getEnv("WRITE_DB_HOST", "db:3306")+")/"+getEnv("WRITE_DB_NAME", "ripple")),
 		RedisEnable:       getEnvBool("REDIS_ENABLE", true),
