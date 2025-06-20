@@ -139,7 +139,7 @@ func main() {
 	config = configType{
 		ListenTo:          ":80",
 		Unix:              getEnvBool("UNIX", false),
-		DSN:               getEnv("DSN", getEnv("WRITE_DB_USER", "root")+":"+getEnv("WRITE_DB_PASS", "password")+"@tcp("+getEnv("WRITE_DB_HOST", "db:3306")+")/"+getEnv("WRITE_DB_NAME", "ripple")),
+		DSN:               getEnv("DSN", getEnv("WRITE_DB_USER", "root")+":"+getEnv("WRITE_DB_PASS", "password")+"@tcp("+getEnv("WRITE_DB_HOST", "db:3306")+"):3306/"+getEnv("WRITE_DB_NAME", "ripple")),
 		RedisEnable:       getEnvBool("REDIS_ENABLE", true),
 		AvatarURL:         getEnv("PUBLIC_AVATARS_SERVICE_BASE_URL", "https://a.ripple.moe"),
 		BaseURL:           getEnv("APP_BASE_URL", "https://ripple.moe"),
