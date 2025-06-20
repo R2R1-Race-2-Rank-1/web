@@ -136,25 +136,6 @@ func main() {
 
 	fmt.Println("hanayo " + version)
 
-	err = conf.Load(&config, "hanayo.conf")
-	switch err {
-	case nil:
-		// carry on
-	case conf.ErrNoFile:
-		conf.Export(configType{
-                       AvatarURL:      "https://a.DOMAIN",
-                       BaseURL:        "https://DOMAIN",
-                       BanchoAPI:      "https://c.DOMAIN",
-					   DSN:            "root:MYSQL_ROOT_PASSWORD@tcp(db:3306)/ripple",
-					   APISecret:      "APISECRETVALUE",
-                       RedisEnable:    true,
-               }, "hanayo.conf")
-		fmt.Println("The configuration file was not found. We created one for you.")
-		return
-	default:
-		panic(err)
-	}
-
 	config = configType{
 		ListenTo:          getEnv("APP_HOST", ":45221"),
 		Unix:              getEnvBool("UNIX", false),
